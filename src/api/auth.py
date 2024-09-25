@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import Security, HTTPException, status, Request
 from fastapi.security.api_key import APIKeyHeader
 import os
@@ -5,9 +6,13 @@ import dotenv
 
 dotenv.load_dotenv()
 
-api_keys = []  
+api_keys: List[str] = []
 
-api_keys.append(os.environ.get("API_KEY"))
+api_key = os.environ.get("API_KEY")
+if api_key is None:
+    raise RuntimeError("No API key provided")
+
+api_keys.append(api_key)
 api_key_header = APIKeyHeader(name="access_token", auto_error=False)
 
 

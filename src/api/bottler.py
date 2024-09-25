@@ -1,5 +1,5 @@
+from typing import Tuple
 from fastapi import APIRouter, Depends
-from enum import Enum
 from pydantic import BaseModel
 from src.api import auth
 
@@ -9,9 +9,16 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
+
 class PotionInventory(BaseModel):
     potion_type: list[int]
     quantity: int
+
+
+class BottlePlan(BaseModel):
+    potion_type: Tuple[int, int, int, int]
+    quantity: int
+
 
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
@@ -19,6 +26,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     return "OK"
+
 
 @router.post("/plan")
 def get_bottle_plan():
@@ -33,11 +41,12 @@ def get_bottle_plan():
     # Initial logic: bottle all barrels into red potions.
 
     return [
-            {
-                "potion_type": [100, 0, 0, 0],
-                "quantity": 5,
-            }
-        ]
+        BottlePlan(
+            potion_type=(100, 0, 0, 0),
+            quantity=5,
+        )
+    ]
+
 
 if __name__ == "__main__":
     print(get_bottle_plan())

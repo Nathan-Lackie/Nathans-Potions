@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
 from src.api import auth
 
 router = APIRouter(
@@ -8,6 +7,7 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
+
 @router.post("/reset")
 def reset():
     """
@@ -15,4 +15,3 @@ def reset():
     inventory, and all barrels are removed from inventory. Carts are all reset.
     """
     return "OK"
-
