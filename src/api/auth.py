@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import Security, HTTPException, status, Request
 from fastapi.security.api_key import APIKeyHeader
 import os
@@ -6,7 +5,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-api_keys: List[str] = []
+api_keys: list[str] = []
 
 api_key = os.environ.get("API_KEY")
 if api_key is None:

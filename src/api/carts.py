@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
@@ -39,7 +38,7 @@ class Result(BaseModel):
 class SearchOrder(BaseModel):
     previous: str
     next: str
-    results: List[Result]
+    results: list[Result]
 
 
 @router.get("/search/", tags=["search"])

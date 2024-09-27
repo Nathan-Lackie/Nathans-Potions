@@ -1,4 +1,3 @@
-from typing import Tuple
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
@@ -16,7 +15,7 @@ class PotionInventory(BaseModel):
 
 
 class BottlePlan(BaseModel):
-    potion_type: Tuple[int, int, int, int]
+    potion_type: tuple[int, int, int, int]
     quantity: int
 
 

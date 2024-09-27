@@ -1,4 +1,3 @@
-from typing import List, Union
 from fastapi import FastAPI, exceptions, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -43,14 +42,14 @@ app.include_router(info.router)
 
 
 class ExceptionResponse(BaseModel):
-    message: List[str]
+    message: list[str]
     data: None = None
 
 
 @app.exception_handler(exceptions.RequestValidationError)  # type: ignore
 @app.exception_handler(ValidationError)  # type: ignore
 async def validation_exception_handler(
-    request: Request, exc: Union[exceptions.RequestValidationError, ValidationError]
+    request: Request, exc: exceptions.RequestValidationError | ValidationError
 ):
     logging.error(f"The client sent invalid data!: {exc}")
     exc_json = json.loads(exc.json())

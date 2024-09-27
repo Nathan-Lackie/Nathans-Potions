@@ -1,4 +1,3 @@
-from typing import Tuple
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -10,7 +9,7 @@ class CatalogData(BaseModel):
     name: str
     quantity: int
     price: int
-    potion_type: Tuple[int, int, int, int]
+    potion_type: tuple[int, int, int, int]
 
 
 @router.get("/catalog/", tags=["catalog"])
