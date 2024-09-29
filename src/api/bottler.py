@@ -1,17 +1,14 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
+from src.utils.liquid import get_liquid, update_liquid
+from src.utils.potion import PotionInventory, update_potion
 
 router = APIRouter(
     prefix="/bottler",
     tags=["bottler"],
     dependencies=[Depends(auth.get_api_key)],
 )
-
-
-class PotionInventory(BaseModel):
-    potion_type: list[int]
-    quantity: int
 
 
 class BottlePlan(BaseModel):
@@ -24,6 +21,12 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
+    for potion in potions_delivered:
+        update_liquid(
+            tuple(-liquid * potion.quantity for liquid in potion.potion_type)  # type: ignore
+        )
+        update_potion(potion.potion_type, potion.quantity)
+
     return "OK"
 
 
@@ -33,16 +36,12 @@ def get_bottle_plan():
     Go from barrel to bottle.
     """
 
-    # Each bottle has a quantity of what proportion of red, blue, and
-    # green potion to add.
-    # Expressed in integers from 1 to 100 that must sum up to 100.
-
-    # Initial logic: bottle all barrels into red potions.
+    liquid = get_liquid()
 
     return [
         BottlePlan(
-            potion_type=(100, 0, 0, 0),
-            quantity=5,
+            potion_type=(0, 100, 0, 0),
+            quantity=liquid["green"] // 100,
         )
     ]
 

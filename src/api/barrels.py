@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
+from src.api.inventory import get_inventory
+from src.utils.gold import update_gold
+from src.utils.liquid import update_liquid
+from src.utils.potion import get_potion
 
 router = APIRouter(
     prefix="/barrels",
@@ -13,7 +17,7 @@ class Barrel(BaseModel):
     sku: str
 
     ml_per_barrel: int
-    potion_type: list[int]
+    potion_type: tuple[int, int, int, int]
     price: int
 
     quantity: int
@@ -24,23 +28,52 @@ class PurchasePlan(BaseModel):
     quantity: int
 
 
+def search_catalog(wholesale_catalog: list[Barrel], sku: str):
+    for barrel in wholesale_catalog:
+        if barrel.sku == sku:
+            return barrel
+    return None
+
+
+def liquid_in_barrel(barrel: Barrel) -> tuple[int, int, int, int]:
+    return tuple(
+        liquid * barrel.ml_per_barrel * barrel.quantity for liquid in barrel.potion_type
+    )  # type: ignore
+
+
 @router.post("/deliver/{order_id}")
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
+    for barrel in barrels_delivered:
+        update_liquid(liquid_in_barrel(barrel))
+        update_gold(-barrel.price * barrel.quantity)
 
     return "OK"
 
 
 # Gets called once a day
 @router.post("/plan")
-def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
+def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]) -> list[PurchasePlan]:
     """ """
-    print(wholesale_catalog)
+    print(f"wholesale catalog: {wholesale_catalog}")
 
-    return [
-        PurchasePlan(
-            sku="SMALL_RED_BARREL",
-            quantity=1,
-        )
-    ]
+    current_green_potions = get_potion((0, 100, 0, 0))
+    current_gold = get_inventory().gold
+
+    green_barrel = search_catalog(wholesale_catalog, "SMALL_GREEN_BARREL")
+
+    if (
+        current_green_potions < 10
+        and green_barrel
+        and green_barrel.price <= current_gold
+        and green_barrel.quantity > 0
+    ):
+        return [
+            PurchasePlan(
+                sku="SMALL_GREEN_BARREL",
+                quantity=1,
+            )
+        ]
+    else:
+        return []
