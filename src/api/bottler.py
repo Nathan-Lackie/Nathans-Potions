@@ -31,19 +31,22 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 
 
 @router.post("/plan")
-def get_bottle_plan():
+def get_bottle_plan() -> list[BottlePlan]:
     """
     Go from barrel to bottle.
     """
 
     liquid = get_liquid()
 
-    return [
-        BottlePlan(
-            potion_type=(0, 100, 0, 0),
-            quantity=liquid["green"] // 100,
-        )
-    ]
+    if liquid["green"] >= 100:
+        return [
+            BottlePlan(
+                potion_type=(0, 100, 0, 0),
+                quantity=liquid["green"] // 100,
+            )
+        ]
+    else:
+        return []
 
 
 if __name__ == "__main__":
