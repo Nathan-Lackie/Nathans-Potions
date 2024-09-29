@@ -2,13 +2,25 @@ import sqlalchemy
 import src.database as db
 
 
-def get_liquid():
+def get_liquid() -> dict[str, int]:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text("SELECT type, amount FROM liquid_inventory")
         )
 
     return dict([liquid.tuple() for liquid in result])
+
+
+def get_total_liquid() -> int:
+    with db.engine.begin() as connection:
+        result = connection.execute(
+            sqlalchemy.text("SELECT SUM(amount) FROM liquid_inventory")
+        ).first()
+
+    if result is None:
+        raise RuntimeError("Error totalling liquid inventory")
+
+    return result[0]
 
 
 def set_liquid(colors: tuple[int, int, int, int]):

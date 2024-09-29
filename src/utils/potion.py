@@ -57,6 +57,18 @@ def get_potions():
     ]
 
 
+def get_total_potions() -> int:
+    with db.engine.begin() as connection:
+        result = connection.execute(
+            sqlalchemy.text("SELECT SUM(quantity) FROM potion_inventory")
+        ).first()
+
+    if result is None:
+        raise RuntimeError("Error totalling potion inventory")
+
+    return result[0]
+
+
 def set_potion(potion_type: tuple[int, int, int, int], amount: int):
     check_potion(potion_type)
 

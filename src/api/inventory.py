@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
-from src.utils.get_inventory import get_inventory_db
+from src.utils.gold import get_gold
+from src.utils.liquid import get_total_liquid
+from src.utils.potion import get_total_potions
 
 router = APIRouter(
     prefix="/inventory",
@@ -10,11 +12,21 @@ router = APIRouter(
 )
 
 
+class Inventory(BaseModel):
+    number_of_potions: int
+    ml_in_barrels: int
+    gold: int
+
+
 @router.get("/audit")
 def get_inventory():
     """ """
 
-    return get_inventory_db()
+    return Inventory(
+        number_of_potions=get_total_potions(),
+        ml_in_barrels=get_total_liquid(),
+        gold=get_gold(),
+    )
 
 
 # Gets called once a day
