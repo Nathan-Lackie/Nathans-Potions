@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
-from src.api.inventory import get_inventory
-from src.utils.gold import update_gold
-from src.utils.liquid import update_liquid
+from src.utils.capacity import get_liquid_capacity
+from src.utils.gold import get_gold, update_gold
+from src.utils.liquid import get_liquid, update_liquid
 from src.utils.potion import get_potion
 
 router = APIRouter(
@@ -59,7 +59,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]) -> list[Purchas
     print(f"wholesale catalog: {wholesale_catalog}")
 
     current_green_potions = get_potion((0, 100, 0, 0))
-    current_gold = get_inventory().gold
+    current_liquid = get_liquid()["green"]
+    current_gold = get_gold()
+    current_liquid_capacity = get_liquid_capacity()
 
     green_barrel = search_catalog(wholesale_catalog, "SMALL_GREEN_BARREL")
 
@@ -68,6 +70,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]) -> list[Purchas
         and green_barrel
         and green_barrel.price <= current_gold
         and green_barrel.quantity > 0
+        and current_liquid < current_liquid_capacity
     ):
         return [
             PurchasePlan(
