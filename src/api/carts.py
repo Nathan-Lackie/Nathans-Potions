@@ -3,6 +3,9 @@ from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
 
+from src.utils.gold import update_gold
+from src.utils.potion import update_potion
+
 router = APIRouter(
     prefix="/carts",
     tags=["cart"],
@@ -106,8 +109,9 @@ def post_visits(visit_id: int, customers: list[Customer]):
 
 
 @router.post("/")
-def create_cart(new_cart: Customer):
+def create_cart(customer: Customer):
     """ """
+    print(f"New cart created with id 1. Customer: {customer.dict()}")
     return {"cart_id": 1}
 
 
@@ -118,6 +122,7 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
+    print(f"Item {item_sku} (x{cart_item.quantity}) added to cart {cart_id}")
 
     return "OK"
 
@@ -129,5 +134,9 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
+    print(f"Checkout for cart {cart_id}")
+
+    update_potion((0, 100, 0, 0), -1)
+    update_gold(50)
 
     return {"total_potions_bought": 1, "total_gold_paid": 50}

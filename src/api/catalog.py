@@ -23,21 +23,37 @@ def get_catalog():
     """
     Each unique item combination must have only a single price.
     """
+    print("Catalog requested")
 
     catalog: list[CatalogData] = []
-    for potion in get_potions():
-        if len(catalog) >= 6:
-            break
 
-        sku = create_sku(potion.potion_type)
+    potions = get_potions()
+
+    if len(potions) > 0:
         catalog.append(
             CatalogData(
-                sku=sku,
-                name=sku,
-                quantity=potion.quantity,
+                sku=create_sku((0, 100, 0, 0)),
+                name="Green Potion",
+                quantity=1,
                 price=50,
-                potion_type=potion.potion_type,
+                potion_type=(0, 100, 0, 0),
             )
         )
+
+    # TODO: re-add this when order managment works properly
+    # for potion in potions:
+    #     if len(catalog) >= 6:
+    #         break
+
+    #     sku = create_sku(potion.potion_type)
+    #     catalog.append(
+    #         CatalogData(
+    #             sku=sku,
+    #             name=sku,
+    #             quantity=potion.quantity,
+    #             price=50,
+    #             potion_type=potion.potion_type,
+    #         )
+    #     )
 
     return catalog
