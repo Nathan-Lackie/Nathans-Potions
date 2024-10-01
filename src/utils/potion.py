@@ -60,7 +60,7 @@ def get_potions():
 def get_total_potions() -> int:
     with db.engine.begin() as connection:
         result = connection.execute(
-            sqlalchemy.text("SELECT SUM(quantity) FROM potion_inventory")
+            sqlalchemy.text("SELECT COALESCE(SUM(quantity), 0) FROM potion_inventory")
         ).first()
 
     if result is None:
