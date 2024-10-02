@@ -134,7 +134,7 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-    print(f"Checkout for cart {cart_id}")
+    print(f"Checkout for cart {cart_id}: {cart_checkout.dict()}")
 
     update_potion((0, 100, 0, 0), -1)
     update_gold(50)
