@@ -1,10 +1,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
-from src.utils.capacity import get_liquid_capacity
-from src.utils.gold import get_gold, update_gold
-from src.utils.liquid import get_liquid, update_liquid
-from src.utils.potion import get_potion
+from src import utils
 
 router = APIRouter(
     prefix="/barrels",
@@ -46,8 +43,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
     for barrel in barrels_delivered:
-        update_liquid(liquid_in_barrel(barrel))
-        update_gold(-barrel.price * barrel.quantity)
+        utils.update_liquid(liquid_in_barrel(barrel))
+        utils.update_gold(-barrel.price * barrel.quantity)
 
     return "OK"
 
@@ -58,10 +55,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]) -> list[Purchas
     """ """
     print(f"wholesale catalog: {wholesale_catalog}")
 
-    current_green_potions = get_potion((0, 100, 0, 0))
-    current_liquid = get_liquid()["green"]
-    current_gold = get_gold()
-    current_liquid_capacity = get_liquid_capacity()
+    current_green_potions = utils.get_potion((0, 100, 0, 0))
+    current_liquid = utils.get_liquid()["green"]
+    current_gold = utils.get_gold()
+    current_liquid_capacity = utils.get_liquid_capacity()
 
     green_barrel = search_catalog(wholesale_catalog, "SMALL_GREEN_BARREL")
 

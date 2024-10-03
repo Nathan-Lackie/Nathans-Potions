@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
-from src.utils.liquid import get_liquid, update_liquid
-from src.utils.potion import PotionInventory, update_potion
+from src import utils
+from src.utils import PotionInventory
 
 router = APIRouter(
     prefix="/bottler",
@@ -22,10 +22,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     for potion in potions_delivered:
-        update_liquid(
+        utils.update_liquid(
             tuple(-liquid * potion.quantity for liquid in potion.potion_type)  # type: ignore
         )
-        update_potion(potion.potion_type, potion.quantity)
+        utils.update_potion(potion.potion_type, potion.quantity)
 
     return "OK"
 
@@ -36,7 +36,7 @@ def get_bottle_plan() -> list[BottlePlan]:
     Go from barrel to bottle.
     """
 
-    liquid = get_liquid()
+    liquid = utils.get_liquid()
 
     if liquid["green"] >= 100:
         return [

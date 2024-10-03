@@ -2,9 +2,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
-
-from src.utils.gold import update_gold
-from src.utils.potion import update_potion
+from src import utils
 
 router = APIRouter(
     prefix="/carts",
@@ -136,7 +134,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     print(f"Checkout for cart {cart_id}: {cart_checkout.dict()}")
 
-    update_potion((0, 100, 0, 0), -1)
-    update_gold(50)
+    utils.update_potion((0, 100, 0, 0), -1)
+    utils.update_gold(50)
 
     return {"total_potions_bought": 1, "total_gold_paid": 50}

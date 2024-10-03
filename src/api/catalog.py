@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-
-from src.utils.potion import get_potions
+from src import utils
 
 router = APIRouter()
 
@@ -27,7 +26,7 @@ def get_catalog():
 
     catalog: list[CatalogData] = []
 
-    potions = get_potions()
+    potions = utils.get_potions()
 
     if len(potions) > 0:
         catalog.append(
