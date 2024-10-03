@@ -5,3 +5,4 @@ from .liquid import *
 from .potion import *
 from .customer import *
 from .time import *
+from .visit import *

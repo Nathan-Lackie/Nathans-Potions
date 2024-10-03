@@ -100,6 +100,8 @@ def post_visits(visit_id: int, customers: list[Customer]):
 
     utils.set_customers(customers)
 
+    utils.set_visits(customers)
+
     return "OK"
 
 
