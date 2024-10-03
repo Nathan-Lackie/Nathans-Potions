@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
 from src import utils
+from src.utils import Customer
 
 router = APIRouter(
     prefix="/carts",
@@ -90,18 +91,14 @@ def search_orders(
     )
 
 
-class Customer(BaseModel):
-    customer_name: str
-    character_class: str
-    level: int
-
-
 @router.post("/visits/{visit_id}")
 def post_visits(visit_id: int, customers: list[Customer]):
     """
     Which customers visited the shop today?
     """
-    print(customers)
+    print(f"List of customers who visited the shop: {customers}")
+
+    utils.set_customers(customers)
 
     return "OK"
 
