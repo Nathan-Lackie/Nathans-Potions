@@ -55,7 +55,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]) -> list[Purchas
     """ """
     print(f"wholesale catalog: {wholesale_catalog}")
 
-    current_green_potions = utils.get_potion((0, 100, 0, 0))
+    current_green_potions = utils.get_potion("GREEN_POTION").quantity
     current_liquid = utils.get_liquid()["green"]
     current_gold = utils.get_gold()
     current_liquid_capacity = utils.get_liquid_capacity()

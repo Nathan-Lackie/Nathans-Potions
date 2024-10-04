@@ -13,10 +13,6 @@ class CatalogData(BaseModel):
     potion_type: tuple[int, int, int, int]
 
 
-def create_sku(potion_type: tuple[int, int, int, int]):
-    return f"POTION_{'_'.join([str(liquid) for liquid in potion_type])}"
-
-
 @router.get("/catalog/", tags=["catalog"])
 def get_catalog():
     """
@@ -26,16 +22,16 @@ def get_catalog():
 
     catalog: list[CatalogData] = []
 
-    potions = utils.get_potions()
+    green_potion = utils.get_potion("GREEN_POTION")
 
-    if len(potions) > 0:
+    if green_potion.quantity > 0:
         catalog.append(
             CatalogData(
-                sku=create_sku((0, 100, 0, 0)),
-                name="Green Potion",
+                sku=green_potion.sku,
+                name=green_potion.name,
                 quantity=1,
-                price=50,
-                potion_type=(0, 100, 0, 0),
+                price=green_potion.price,
+                potion_type=green_potion.potion_type,
             )
         )
 

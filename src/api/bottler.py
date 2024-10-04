@@ -2,13 +2,17 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
 from src import utils
-from src.utils import PotionInventory
 
 router = APIRouter(
     prefix="/bottler",
     tags=["bottler"],
     dependencies=[Depends(auth.get_api_key)],
 )
+
+
+class PotionInventory(BaseModel):
+    potion_type: tuple[int, int, int, int]
+    quantity: int
 
 
 class BottlePlan(BaseModel):
@@ -25,7 +29,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         utils.update_liquid(
             tuple(-liquid * potion.quantity for liquid in potion.potion_type)  # type: ignore
         )
-        utils.update_potion(potion.potion_type, potion.quantity)
+        utils.update_potion_type(potion.potion_type, potion.quantity)
 
     return "OK"
 

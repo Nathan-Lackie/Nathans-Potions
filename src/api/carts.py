@@ -133,7 +133,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     print(f"Checkout for cart {cart_id}: {cart_checkout.dict()}")
 
-    utils.update_potion((0, 100, 0, 0), -1)
+    utils.update_potion("GREEN_POTION", -1)
     utils.update_gold(50)
 
     return {"total_potions_bought": 1, "total_gold_paid": 50}
