@@ -22,33 +22,23 @@ def get_catalog():
 
     catalog: list[CatalogData] = []
 
-    green_potion = utils.get_potion("GREEN_POTION")
+    potions = utils.get_potions()
 
-    if green_potion.quantity > 0:
+    for potion in potions:
+        if len(catalog) >= 6:
+            break
+
+        if potion.quantity == 0:
+            continue
+
         catalog.append(
             CatalogData(
-                sku=green_potion.sku,
-                name=green_potion.name,
-                quantity=1,
-                price=green_potion.price,
-                potion_type=green_potion.potion_type,
+                sku=potion.sku,
+                name=potion.name,
+                quantity=potion.quantity,
+                price=potion.price,
+                potion_type=potion.potion_type,
             )
         )
-
-    # TODO: re-add this when order managment works properly
-    # for potion in potions:
-    #     if len(catalog) >= 6:
-    #         break
-
-    #     sku = create_sku(potion.potion_type)
-    #     catalog.append(
-    #         CatalogData(
-    #             sku=sku,
-    #             name=sku,
-    #             quantity=potion.quantity,
-    #             price=50,
-    #             potion_type=potion.potion_type,
-    #         )
-    #     )
 
     return catalog

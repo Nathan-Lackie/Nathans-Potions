@@ -108,8 +108,10 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(customer: Customer):
     """ """
-    print(f"New cart created with id 1. Customer: {customer.dict()}")
-    return {"cart_id": 1}
+    cart_id = utils.get_recent_visit(customer)
+
+    print(f"New cart created with id {cart_id}. Customer: {customer.dict()}")
+    return {"cart_id": cart_id}
 
 
 class CartItem(BaseModel):
@@ -119,6 +121,8 @@ class CartItem(BaseModel):
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
+    utils.add_to_cart(cart_id, item_sku, cart_item.quantity)
+
     print(f"Item {item_sku} (x{cart_item.quantity}) added to cart {cart_id}")
 
     return "OK"
@@ -133,7 +137,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     print(f"Checkout for cart {cart_id}: {cart_checkout.dict()}")
 
-    utils.update_potion("GREEN_POTION", -1)
-    utils.update_gold(50)
+    result = utils.checkout_cart(cart_id)
 
-    return {"total_potions_bought": 1, "total_gold_paid": 50}
+    return {"total_potions_bought": result.potions, "total_gold_paid": result.gold}
