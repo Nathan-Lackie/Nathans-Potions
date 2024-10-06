@@ -6,7 +6,7 @@ def get_gold() -> int:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT gold FROM global_inventory",
+                "SELECT gold FROM gold",
             ),
         ).first()
 
@@ -20,7 +20,7 @@ def set_gold(amount: int):
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                "UPDATE global_inventory SET gold = :amount",
+                "UPDATE gold SET gold = :amount",
             ).bindparams(amount=amount),
         )
 
@@ -29,6 +29,6 @@ def update_gold(amount: int):
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                "UPDATE global_inventory SET gold = gold + :amount",
+                "UPDATE gold SET gold = gold + :amount",
             ).bindparams(amount=amount),
         )
