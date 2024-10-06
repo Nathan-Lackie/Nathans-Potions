@@ -12,6 +12,11 @@ def get_liquid() -> dict[Literal["red", "green", "blue", "dark"], int]:
     return dict([liquid.tuple() for liquid in result])
 
 
+def get_liquid_tuple():
+    liquid = get_liquid()
+    return (liquid["red"], liquid["green"], liquid["blue"], liquid["dark"])
+
+
 def get_total_liquid() -> int:
     with db.engine.begin() as connection:
         result = connection.execute(

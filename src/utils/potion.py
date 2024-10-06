@@ -46,7 +46,7 @@ def get_potions() -> list[Potion]:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT sku, name, red, green, blue, dark, price, quantity FROM potions WHERE quantity > 0"
+                "SELECT sku, name, red, green, blue, dark, price, quantity FROM potions"
             )
         )
 
