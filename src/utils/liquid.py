@@ -1,8 +1,9 @@
+from typing import Literal
 import sqlalchemy
 import src.database as db
 
 
-def get_liquid() -> dict[str, int]:
+def get_liquid() -> dict[Literal["red", "green", "blue", "dark"], int]:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text("SELECT type, amount FROM liquid_inventory")

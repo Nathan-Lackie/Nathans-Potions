@@ -1,3 +1,4 @@
+from typing import Literal
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
@@ -49,31 +50,70 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     return "OK"
 
 
+def potion_from_color(color: Literal["red", "green", "blue", "dark"]):
+    if color == "red":
+        return (1, 0, 0, 0)
+
+    if color == "green":
+        return (0, 1, 0, 0)
+
+    if color == "blue":
+        return (0, 0, 1, 0)
+
+    if color == "dark":
+        return (0, 0, 0, 1)
+
+    raise RuntimeError(f"Invalid color: {color}")
+
+
+def find_greatest_barrel(
+    wholesale_catalog: list[Barrel],
+    potion_type: tuple[int, int, int, int],
+    capacity: int,
+    current_gold: int,
+):
+    greatest_barrel = None
+
+    for barrel in wholesale_catalog:
+        if (
+            barrel.potion_type != potion_type
+            or barrel.ml_per_barrel > capacity
+            or barrel.price > current_gold
+        ):
+            continue
+
+        if (
+            greatest_barrel is None
+            or barrel.ml_per_barrel > greatest_barrel.ml_per_barrel
+        ):
+            greatest_barrel = barrel
+
+    return greatest_barrel
+
+
 # Gets called once a day
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]) -> list[PurchasePlan]:
     """ """
     print(f"wholesale catalog: {wholesale_catalog}")
 
-    current_green_potions = utils.get_potion("GREEN_POTION").quantity
-    current_liquid = utils.get_liquid()["green"]
+    current_liquid = utils.get_liquid()
     current_gold = utils.get_gold()
-    current_liquid_capacity = utils.get_liquid_capacity()
+    current_liquid_capacity = utils.get_liquid_capacity() // 4
 
-    green_barrel = search_catalog(wholesale_catalog, "SMALL_GREEN_BARREL")
+    purchase_plan: list[PurchasePlan] = []
 
-    if (
-        current_green_potions < 10
-        and green_barrel
-        and green_barrel.price <= current_gold
-        and green_barrel.quantity > 0
-        and current_liquid < current_liquid_capacity
-    ):
-        return [
-            PurchasePlan(
-                sku="SMALL_GREEN_BARREL",
-                quantity=1,
+    for color in current_liquid:
+        if current_liquid[color] == 0:
+            greatest_barrel = find_greatest_barrel(
+                wholesale_catalog,
+                potion_from_color(color),
+                current_liquid_capacity,
+                current_gold,
             )
-        ]
-    else:
-        return []
+
+            if greatest_barrel is not None:
+                purchase_plan.append(PurchasePlan(sku=greatest_barrel.sku, quantity=1))
+                current_gold -= greatest_barrel.price
+
+    return purchase_plan
