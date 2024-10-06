@@ -41,12 +41,13 @@ def get_bottle_plan() -> list[BottlePlan]:
     """
 
     liquid = utils.get_liquid()
+    green_potions = utils.get_potion("GREEN_POTION")
 
-    if liquid["green"] >= 100:
+    if liquid["green"] >= 100 and green_potions.quantity < 10:
         return [
             BottlePlan(
                 potion_type=(0, 100, 0, 0),
-                quantity=liquid["green"] // 100,
+                quantity=min(liquid["green"] // 100, 10 - green_potions.quantity),
             )
         ]
     else:
