@@ -9,6 +9,7 @@ class Potion(BaseModel):
     potion_type: tuple[int, int, int, int]
     price: int
     quantity: int
+    desired_quantity: int | None
 
 
 def clear_potions():
@@ -24,7 +25,7 @@ def get_potion(sku: str) -> Potion:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT sku, name, red, green, blue, dark, price, quantity FROM potions WHERE sku = :sku"
+                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity FROM potions WHERE sku = :sku"
             ).bindparams(
                 sku=sku,
             )
@@ -39,6 +40,7 @@ def get_potion(sku: str) -> Potion:
         potion_type=tuple(result[2:6]),
         price=result[6],
         quantity=result[7],
+        desired_quantity=result[8],
     )
 
 
@@ -46,7 +48,7 @@ def get_potions() -> list[Potion]:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT sku, name, red, green, blue, dark, price, quantity FROM potions"
+                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity FROM potions"
             )
         )
 
@@ -57,6 +59,7 @@ def get_potions() -> list[Potion]:
             potion_type=tuple(potion[2:6]),
             price=potion[6],
             quantity=potion[7],
+            desired_quantity=potion[8],
         )
         for potion in result
     ]

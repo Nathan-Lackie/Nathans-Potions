@@ -72,12 +72,17 @@ def get_bottle_plan() -> list[BottlePlan]:
 
     # We want to ensure potions are bottled evenly
     # We do this by always adding quantity to the smallest element in the potion list, while keeping it sorted
-    # If we don't have enough liquid for a potion type, we remove it from the list
+    # If we don't have enough liquid for a potion type, or we've reached the desired quantity for that potion type, we remove it from the list
     # We continue this until either the potion list is empty, or we run out of potion capacity
     i = 0
     while len(potions) > 0 and total_potions < capacity:
-        # If we can't afford a potion, remove it from the list
-        if not can_afford_potion(potions[i], liquid):
+        desired_quantity = potions[i].desired_quantity
+        reached_desired_quantity = (
+            desired_quantity is not None and potions[i].quantity >= desired_quantity
+        )
+
+        # If we can't afford a potion, or we've reached the desired quantity, remove it from the list
+        if not can_afford_potion(potions[i], liquid) or reached_desired_quantity:
             potions.pop(i)
             i = max(0, i - 1)
         # Navigate to the smallest element in the list
