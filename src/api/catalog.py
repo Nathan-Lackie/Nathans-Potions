@@ -28,7 +28,7 @@ def get_catalog():
         if len(catalog) >= 6:
             break
 
-        if potion.quantity == 0:
+        if potion.quantity == 0 or not potion.show_in_catalog:
             continue
 
         catalog.append(

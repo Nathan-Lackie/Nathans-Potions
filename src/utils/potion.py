@@ -10,6 +10,7 @@ class Potion(BaseModel):
     price: int
     quantity: int
     desired_quantity: int | None
+    show_in_catalog: bool
 
 
 def clear_potions():
@@ -25,7 +26,7 @@ def get_potion(sku: str) -> Potion:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity FROM potions WHERE sku = :sku"
+                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity, show_in_catalog FROM potions WHERE sku = :sku"
             ).bindparams(
                 sku=sku,
             )
@@ -41,6 +42,7 @@ def get_potion(sku: str) -> Potion:
         price=result[6],
         quantity=result[7],
         desired_quantity=result[8],
+        show_in_catalog=result[9],
     )
 
 
@@ -48,7 +50,7 @@ def get_potions() -> list[Potion]:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity FROM potions"
+                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity, show_in_catalog FROM potions"
             )
         )
 
@@ -60,6 +62,7 @@ def get_potions() -> list[Potion]:
             price=potion[6],
             quantity=potion[7],
             desired_quantity=potion[8],
+            show_in_catalog=potion[9],
         )
         for potion in result
     ]
