@@ -6,22 +6,20 @@ def get_gold() -> int:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT gold FROM gold",
+                "SELECT SUM(update) as total_gold FROM gold",
             ),
-        ).first()
+        ).one()
 
-    if result is None:
-        raise RuntimeError("Error getting gold")
-
-    return result[0]
+    return result.total_gold
 
 
-def set_gold(amount: int):
+def reset_gold():
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                "UPDATE gold SET gold = :amount",
-            ).bindparams(amount=amount),
+                """DELETE FROM gold;
+                ALTER SEQUENCE gold_id_seq RESTART WITH 1;""",
+            ),
         )
 
 
@@ -29,6 +27,6 @@ def update_gold(amount: int):
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                "UPDATE gold SET gold = gold + :amount",
+                "INSERT INTO gold (update) VALUES (:amount)",
             ).bindparams(amount=amount),
         )

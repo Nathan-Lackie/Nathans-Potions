@@ -15,7 +15,8 @@ def reset():
     Reset the game state. Gold goes to 100, all potions are removed from
     inventory, and all barrels are removed from inventory. Carts are all reset.
     """
-    utils.set_gold(100)
+    utils.reset_gold()
+    utils.update_gold(100)
 
     utils.clear_potions()
 
