@@ -20,7 +20,7 @@ def reset():
 
     utils.clear_potions()
 
-    utils.set_liquid((0, 0, 0, 0))
+    utils.reset_liquid()
 
     utils.set_liquid_capacity(1)
     utils.set_potion_capacity(1)

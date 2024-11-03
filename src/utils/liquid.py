@@ -6,7 +6,7 @@ import src.database as db
 def get_liquid() -> dict[Literal["red", "green", "blue", "dark"], int]:
     with db.engine.begin() as connection:
         result = connection.execute(
-            sqlalchemy.text("SELECT type, amount FROM liquid_inventory")
+            sqlalchemy.text("SELECT color, SUM(update) FROM liquid GROUP BY color")
         )
 
     return dict([liquid.tuple() for liquid in result])
@@ -20,46 +20,33 @@ def get_liquid_tuple():
 def get_total_liquid() -> int:
     with db.engine.begin() as connection:
         result = connection.execute(
-            sqlalchemy.text("SELECT SUM(amount) FROM liquid_inventory")
-        ).first()
+            sqlalchemy.text("SELECT SUM(update) as total FROM liquid")
+        ).one()
 
-    if result is None:
-        raise RuntimeError("Error totalling liquid inventory")
-
-    return result[0]
+    return result.total
 
 
-def set_liquid(colors: tuple[int, int, int, int]):
+def reset_liquid():
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                """UPDATE liquid_inventory
-                SET amount = CASE
-                    WHEN type = 'red' THEN :red
-                    WHEN type = 'green' THEN :green
-                    WHEN type = 'blue' THEN :blue
-                    WHEN type = 'dark' THEN :dark
-                END
-                WHERE type IN ('red', 'green', 'blue', 'dark');""",
-            ).bindparams(
-                red=colors[0], green=colors[1], blue=colors[2], dark=colors[3]
+                """DELETE FROM liquid;
+                ALTER SEQUENCE liquid_id_seq RESTART WITH 1;
+                INSERT INTO liquid (color, update)
+                VALUES ('red', 0), ('green', 0), ('blue', 0), ('dark', 0)""",
             ),
         )
 
 
-def update_liquid(colors: tuple[int, int, int, int]):
+colors = ("red", "green", "blue", "dark")
+
+
+def update_liquid(values: tuple[int, int, int, int]):
     with db.engine.begin() as connection:
-        connection.execute(
-            sqlalchemy.text(
-                """UPDATE liquid_inventory
-                SET amount = CASE
-                    WHEN type = 'red' THEN amount + :red
-                    WHEN type = 'green' THEN amount + :green
-                    WHEN type = 'blue' THEN amount + :blue
-                    WHEN type = 'dark' THEN amount + :dark
-                END
-                WHERE type IN ('red', 'green', 'blue', 'dark');""",
-            ).bindparams(
-                red=colors[0], green=colors[1], blue=colors[2], dark=colors[3]
-            ),
-        )
+        for color, value in zip(colors, values):
+            if value != 0:
+                connection.execute(
+                    sqlalchemy.text(
+                        "INSERT INTO liquid (color, update) VALUES (:color, :update)",
+                    ).bindparams(color=color, update=value),
+                )
