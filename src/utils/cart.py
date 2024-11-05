@@ -27,8 +27,8 @@ def get_contents(cart_id: int):
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                """SELECT sku, potions.price, carts.quantity FROM potions
-                JOIN carts ON carts.potion_sku = potions.sku
+                """SELECT sku, catalog.price, carts.quantity FROM catalog
+                JOIN carts ON carts.potion_sku = catalog.sku
                 WHERE carts.id = :id"""
             ).bindparams(id=cart_id)
         )

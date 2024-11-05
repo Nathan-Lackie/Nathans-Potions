@@ -13,11 +13,11 @@ class Potion(BaseModel):
     show_in_catalog: bool
 
 
-def clear_potions():
+def reset_potions():
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                "UPDATE potions SET quantity = 0",
+                "DELETE FROM potions",
             ),
         )
 
@@ -26,23 +26,23 @@ def get_potion(sku: str) -> Potion:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity, show_in_catalog FROM potions WHERE sku = :sku"
+                """SELECT catalog.sku, name, red, green, blue, dark, price, COALESCE(SUM(update), 0) as quantity, desired_quantity, show_in_catalog FROM catalog
+                LEFT JOIN potions ON catalog.sku = potions.sku
+                WHERE catalog.sku = :sku
+                GROUP BY catalog.sku"""
             ).bindparams(
                 sku=sku,
             )
-        ).first()
-
-    if result is None:
-        raise RuntimeError(f"Potion {sku} not found")
+        ).one()
 
     return Potion(
-        sku=result[0],
-        name=result[1],
-        potion_type=tuple(result[2:6]),
-        price=result[6],
-        quantity=result[7],
-        desired_quantity=result[8],
-        show_in_catalog=result[9],
+        sku=result.sku,
+        name=result.name,
+        potion_type=(result.red, result.green, result.blue, result.dark),
+        price=result.price,
+        quantity=result.quantity,
+        desired_quantity=result.desired_quantity,
+        show_in_catalog=result.show_in_catalog,
     )
 
 
@@ -50,19 +50,21 @@ def get_potions() -> list[Potion]:
     with db.engine.begin() as connection:
         result = connection.execute(
             sqlalchemy.text(
-                "SELECT sku, name, red, green, blue, dark, price, quantity, desired_quantity, show_in_catalog FROM potions"
+                """SELECT catalog.sku, name, red, green, blue, dark, price, COALESCE(SUM(update), 0) as quantity, desired_quantity, show_in_catalog FROM catalog
+                LEFT JOIN potions ON catalog.sku = potions.sku
+                GROUP BY catalog.sku"""
             )
         )
 
     return [
         Potion(
-            sku=potion[0],
-            name=potion[1],
-            potion_type=tuple(potion[2:6]),
-            price=potion[6],
-            quantity=potion[7],
-            desired_quantity=potion[8],
-            show_in_catalog=potion[9],
+            sku=potion.sku,
+            name=potion.name,
+            potion_type=(potion.red, potion.green, potion.blue, potion.dark),
+            price=potion.price,
+            quantity=potion.quantity,
+            desired_quantity=potion.desired_quantity,
+            show_in_catalog=potion.show_in_catalog,
         )
         for potion in result
     ]
@@ -71,32 +73,17 @@ def get_potions() -> list[Potion]:
 def get_total_potions() -> int:
     with db.engine.begin() as connection:
         result = connection.execute(
-            sqlalchemy.text("SELECT COALESCE(SUM(quantity), 0) FROM potions")
-        ).first()
+            sqlalchemy.text("SELECT COALESCE(SUM(update), 0) as quantity FROM potions")
+        ).one()
 
-    if result is None:
-        raise RuntimeError("Error totalling potion inventory")
-
-    return result[0]
-
-
-def set_potion(sku: str, amount: int):
-    with db.engine.begin() as connection:
-        connection.execute(
-            sqlalchemy.text(
-                "UPDATE potions SET quantity = :amount WHERE sku = :sku",
-            ).bindparams(
-                sku=sku,
-                amount=amount,
-            ),
-        )
+    return result.quantity
 
 
 def update_potion(sku: str, amount: int):
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                "UPDATE potions SET quantity = quantity + :amount WHERE sku = :sku",
+                "INSERT INTO potions (sku, update) VALUES (:sku, :amount)",
             ).bindparams(
                 sku=sku,
                 amount=amount,
@@ -106,14 +93,22 @@ def update_potion(sku: str, amount: int):
 
 def update_potion_type(type: tuple[int, int, int, int], amount: int):
     with db.engine.begin() as connection:
-        connection.execute(
+        sku = connection.execute(
             sqlalchemy.text(
-                "UPDATE potions SET quantity = quantity + :amount WHERE red = :red AND green = :green AND blue = :blue AND dark = :dark",
+                "SELECT sku FROM catalog WHERE red = :red AND green = :green AND blue = :blue AND dark = :dark",
             ).bindparams(
                 red=type[0],
                 green=type[1],
                 blue=type[2],
                 dark=type[3],
+            )
+        ).one()
+
+        connection.execute(
+            sqlalchemy.text(
+                "INSERT INTO potions (sku, update) VALUES (:sku, :amount)",
+            ).bindparams(
+                sku=sku[0],
                 amount=amount,
             ),
         )

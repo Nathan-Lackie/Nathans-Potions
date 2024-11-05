@@ -18,7 +18,7 @@ def reset():
     utils.reset_gold()
     utils.update_gold(100)
 
-    utils.clear_potions()
+    utils.reset_potions()
 
     utils.reset_liquid()
 
