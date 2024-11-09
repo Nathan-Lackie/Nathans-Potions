@@ -18,7 +18,7 @@ def add_to_cart(cart_id: int, sku: str, quantity: int):
     with db.engine.begin() as connection:
         connection.execute(
             sqlalchemy.text(
-                "INSERT INTO carts (id, potion_sku, quantity) VALUES (:id, :sku, :quantity)"
+                "INSERT INTO carts (visit_id, potion_sku, quantity) VALUES (:id, :sku, :quantity)"
             ).bindparams(id=cart_id, sku=sku, quantity=quantity)
         )
 
@@ -29,7 +29,7 @@ def get_contents(cart_id: int):
             sqlalchemy.text(
                 """SELECT sku, catalog.price, carts.quantity FROM catalog
                 JOIN carts ON carts.potion_sku = catalog.sku
-                WHERE carts.id = :id"""
+                WHERE carts.visit_id = :id"""
             ).bindparams(id=cart_id)
         )
 
