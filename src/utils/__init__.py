@@ -7,3 +7,4 @@ from .customer import *
 from .time import *
 from .visit import *
 from .cart import *
+from .search import *

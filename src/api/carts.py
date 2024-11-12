@@ -1,3 +1,4 @@
+from typing import Literal
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
@@ -19,9 +20,12 @@ class search_sort_options(str, Enum):
     timestamp = "timestamp"
 
 
-class search_sort_order(str, Enum):
-    asc = "asc"
-    desc = "desc"
+column_names = {
+    "customer_name": "customer",
+    "item_sku": "item",
+    "line_item_total": "gold",
+    "timestamp": "timestamp",
+}
 
 
 class search_order(BaseModel):
@@ -47,9 +51,9 @@ class SearchOrder(BaseModel):
 def search_orders(
     customer_name: str = "",
     potion_sku: str = "",
-    search_page: str = "",
+    search_page: str = "1",
     sort_col: search_sort_options = search_sort_options.timestamp,
-    sort_order: search_sort_order = search_sort_order.desc,
+    sort_order: Literal["asc", "desc"] = "desc",
 ):
     """
     Search for cart line items by customer name and/or potion sku.
@@ -76,17 +80,32 @@ def search_orders(
     time is 5 total line items.
     """
 
+    search_result = utils.search_orders(
+        int(search_page),
+        customer_name,
+        potion_sku,
+        column_names[sort_col],
+        sort_order.upper(),
+    )
+
+    previous_page = int(search_page) - 1
+    previous_page = "" if previous_page == 0 else previous_page
+
+    next_page = int(search_page) + 1
+    next_page = next_page if search_result.has_next_page else ""
+
     return SearchOrder(
-        previous="",
-        next="",
+        previous=str(previous_page),
+        next=str(next_page),
         results=[
             Result(
-                line_item_id=1,
-                item_sku="1 oblivion potion",
-                customer_name="Scaramouche",
-                line_item_total=50,
-                timestamp="2021-01-01T00:00:00Z",
+                line_item_id=result.id,
+                item_sku=f"{result.item} ({result.quantity}x)",
+                customer_name=result.customer,
+                line_item_total=result.gold,
+                timestamp=result.time.isoformat(),
             )
+            for result in search_result.orders
         ],
     )
 
