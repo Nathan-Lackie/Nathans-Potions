@@ -99,7 +99,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]) -> list[Purchas
 
     current_liquid = utils.get_liquid()
     current_gold = utils.get_gold()
-    current_liquid_capacity = utils.get_liquid_capacity() // 4
+    current_liquid_capacity = (utils.get_liquid_capacity() * 10000) // 4
 
     purchase_plan: list[PurchasePlan] = []
 

@@ -13,7 +13,7 @@ def get_liquid_capacity() -> int:
     if result is None:
         raise RuntimeError("Error getting liquid capacity")
 
-    return result[0] * 10000
+    return result[0]
 
 
 def set_liquid_capacity(capacity: int):
@@ -21,6 +21,15 @@ def set_liquid_capacity(capacity: int):
         connection.execute(
             sqlalchemy.text(
                 "UPDATE capacity SET capacity = :capacity WHERE type = 'liquid'",
+            ).bindparams(capacity=capacity),
+        )
+
+
+def update_liquid_capacity(capacity: int):
+    with db.engine.begin() as connection:
+        connection.execute(
+            sqlalchemy.text(
+                "UPDATE capacity SET capacity = capacity + :capacity WHERE type = 'liquid'",
             ).bindparams(capacity=capacity),
         )
 
@@ -36,7 +45,7 @@ def get_potion_capacity() -> int:
     if result is None:
         raise RuntimeError("Error getting potion capacity")
 
-    return result[0] * 50
+    return result[0]
 
 
 def set_potion_capacity(capacity: int):
@@ -44,5 +53,14 @@ def set_potion_capacity(capacity: int):
         connection.execute(
             sqlalchemy.text(
                 "UPDATE capacity SET capacity = :capacity WHERE type = 'potion'",
+            ).bindparams(capacity=capacity),
+        )
+
+
+def update_potion_capacity(capacity: int):
+    with db.engine.begin() as connection:
+        connection.execute(
+            sqlalchemy.text(
+                "UPDATE capacity SET capacity = capacity + :capacity WHERE type = 'potion'",
             ).bindparams(capacity=capacity),
         )

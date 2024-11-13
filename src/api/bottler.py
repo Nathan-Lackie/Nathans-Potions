@@ -64,7 +64,7 @@ def get_bottle_plan() -> list[BottlePlan]:
     liquid: tuple[int, int, int, int] = utils.get_liquid_tuple()
     potions = utils.get_potions()
     total_potions = sum([potion.quantity for potion in potions])
-    capacity = utils.get_potion_capacity()
+    capacity = utils.get_potion_capacity() * 50
 
     potions.sort(key=lambda potion: potion.quantity)
 
